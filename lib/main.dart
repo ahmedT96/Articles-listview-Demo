@@ -1,159 +1,43 @@
+import 'package:simple_articles_api/Controller/Cubit/app_cubit.dart';
+import 'package:simple_articles_api/Controller/bloc_observer.dart';
+import 'package:simple_articles_api/DataSource/Dio_Helper.dart';
+import 'package:simple_articles_api/Presentaion/Screens/home_Screen.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:simple_articles_api/MostSharedPage.dart';
-import 'package:simple_articles_api/MostViewedPage.dart';
-import 'package:simple_articles_api/PopullarPage.dart';
-import 'dart:convert';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'Article.dart';
+import 'Controller/Cubit/app_cubit.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  Bloc.observer = MyBlocObserver();
+  FinalDioHelper.init();
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter API Example',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Home Page'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SearchPage()),
-                );
-              },
-              child: Text('Search'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MostViewedPage()),
-                );
-
-              },
-              child: Text('Most Viewed'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PopularPage()),
-                );
-
-              },
-
-              child: Text('Popular'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-               Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MostSharedPage()),
-                );
-
-
-              },
-              child: Text('Most Shared'),
-            ),
-          ],
+    return MultiBlocProvider(
+      providers: [BlocProvider(create: (context) => AppCubit())],
+      child: MaterialApp(
+        title: 'Eng.Ahmed Tark Task',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          // This is the theme of your application.
+          //
+          // Try running your application with "flutter run". You'll see the
+          // application has a blue toolbar. Then, without quitting the app, try
+          // changing the primarySwatch below to Colors.green and then invoke
+          // "hot reload" (press "r" in the console where you ran "flutter run",
+          // or simply save your changes to "hot reload" in a Flutter IDE).
+          // Notice that the counter didn't reset back to zero; the application
+          // is not restarted.
+          primarySwatch: Colors.blue,
         ),
+        home: HomeScreen(),
       ),
     );
   }
-}
-
-class SearchPage extends StatefulWidget {
-  @override
-  _SearchPageState createState() => _SearchPageState();
-}
-
-class _SearchPageState extends State<SearchPage> {
-  List<Article> articles = [];
-  TextEditingController searchController = TextEditingController();
-
-
-
-
-  Future<void> searchArticles() async {
-    String searchTerm = searchController.text;
-    String apiUrl = 'https://api.example.com/search?term=$searchTerm';
-
-    try {
-      var response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
-          List<Article> results = [];
-        for (var article in data) {
-          //   results.add(Article.fromJson(article));
-        }
-        setState(() {
-          articles = results;
-        });
-      } else {
-        // Handle error
-      }
-    } catch (exception) {
-      // Handle exception
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Search Page'),
-        ),
-        body: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(16.0),
-              child: TextField(
-                controller: searchController,
-                decoration: InputDecoration(
-                  labelText: 'Search',
-                  floatingLabelAlignment: FloatingLabelAlignment.start
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: searchArticles,
-              child: Text('Search',
-                textAlign: TextAlign.start),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: articles.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(articles[index].title.toString()),
-                    subtitle: Text(articles[index].author.toString()),
-                  );
-                },
-              ),
-            ),
-          ],
-        )
-    );
-  }
-
-
 }
